@@ -34,6 +34,7 @@ df_dup_patients$coded_names   <- mapply(df_dup_patients$firstnames,df_dup_patien
 #Inicializacao de vectores e contadores
 vec_unique_nids <- unique(df_dup_patients$patientid)
 vec_nids_triplicados <- c()
+df_ambos_duplicados <- data.frame()
 load(file = "df_patients_corrected.RData")
 df_triplicados <- df_patients_corrected
 counter_triplicado <-0
@@ -117,9 +118,10 @@ for (i in 1:length(vec_unique_nids)) {
       
     }
     else { 
-      
+      # Ambos pacientes com nomes codificados
       message( tmp_df$patientid[1] , " " ,  tmp_df$firstnames[1] , " Ambos pacientes com nomes codificados")
       counter_todos_codificados <- counter_todos_codificados +1
+      df_ambos_duplicados <- rbind.fill(df_ambos_duplicados, tmp_df)
       }
     
     
@@ -175,8 +177,9 @@ for (i in 1:length(vec_unique_nids)) {
 
 }
 
-
-
+# Create a mark_delete flag in df_ambos_duplicados using a vapply with a function to check wich rows have both variables firstnames and lastname with char length of 6
+df_ambos_duplicados$mark_delete <-  mapply( df_ambos_duplicados$firstnames,df_ambos_duplicados$lastname,FUN = function(x,y) {return( nchar(x)==nchar(y) && nchar(x)==6 )} )
+df_ambos_duplicados$mark_delete <- as.logical(df_ambos_duplicados$mark_delete )
 # Criar sql  para remover duplicados
 df_patients_corrected$sql_remove_dups <- mapply( df_patients_corrected$delete_flag,df_patients_corrected$id,df_patients_corrected$patientid,
                                      df_patients_corrected$uuidopenmrs,df_patients_corrected$syncuuid,FUN = create_sql )
@@ -188,20 +191,17 @@ df_patients_corrected$sql_update_uuid <- as.character(df_patients_corrected$sql_
 
 
 
-
 # Filtra Pacientes da Farmac Mocambique
-df_filtered_mocambique_fix_dups <- df_patients_corrected %>% filter(sql_remove_dups != "NULL"  &  clinicname=='Farmacia Mocambique')  %>% select(c("id","patientid","firstnames","lastname", "clinicname","mainclinicname" , "uuidopenmrs","uuid_openmrs", 
+df_filtered_mocambique_fix_dups <- df_patients_corrected %>% filter(sql_remove_dups != "NULL"  &  clinicuuid=='a42fa142-cb62-4bef-8414-37e5bbe5f0bf')  %>% 
+  select(c("id","patientid","firstnames","lastname", "clinicname","mainclinicname" , "uuidopenmrs","uuid_openmrs", 
            "update_uuid_openmrs","coded_names","delete_flag", "update_uuid_openmrs", "sql_remove_dups","sql_update_uuid") )
 
-
-
-a <- df_patients_corrected %>% filter(sql_remove_dups != "NULL"  &  clinicuuid=='4a93cbf1-da0d-4657-bc41-93b30cd93b8e')  %>% select(c("id","patientid","firstnames","lastname", "clinicname","mainclinicname" , "uuidopenmrs","uuid_openmrs", 
-           "update_uuid_openmrs","coded_names","delete_flag", "update_uuid_openmrs", "sql_remove_dups","sql_update_uuid") )
 
 
 # Pacientes com uuid do openmrs incorrecto
-df_filtered_mocambique_fix_uuid <-  df_patients_corrected %>% filter(sql_update_uuid != ""  &  clinicname=='Farmacia Mocambique' & delete_flag =="FALSE")  %>% select(c("id","patientid","firstnames","lastname", "clinicname","mainclinicname" , "uuidopenmrs","uuid_openmrs", 
-                                                                                                                               "update_uuid_openmrs","coded_names","delete_flag", "update_uuid_openmrs", "sql_remove_dups","sql_update_uuid") )
+df_filtered_mocambique_fix_uuid <-  df_patients_corrected %>% filter(sql_update_uuid != ""  &  clinicuuid=='a42fa142-cb62-4bef-8414-37e5bbe5f0bf'  & delete_flag=='FALSE')  %>% 
+  select(c("id","patientid","firstnames","lastname", "clinicname","mainclinicname" , "uuidopenmrs","uuid_openmrs", "update_uuid_openmrs","coded_names","delete_flag", "update_uuid_openmrs", "sql_remove_dups","sql_update_uuid") )
+
 
 ## Patients with incorrect uuid
 # a <- df_patients_corrected %>% filter((update_uuid_openmrs==FALSE | is.na(update_uuid_openmrs) )  & delete_flag=="")  %>% 
@@ -211,12 +211,18 @@ df_filtered_mocambique_fix_uuid <-  df_patients_corrected %>% filter(sql_update_
 #a = df_patients_corrected[which(),c("patientid","firstnames","lastname", "uuidopenmrs", "prescriptiondate","coded_names", "uuid_openmrs", "uuid_openmrs", "update_uuid_openmrs","delete_flag", "sites_flag")]
 
 
-for (i in 1:nrow(df_patients_corrected) ) {
+
+for (i in 1:nrow(b) ) {
   
   
-   sql <- df_filtered_mocambique_fix_dups$sql_remove_dups[i]
+   sql <- b$sql_remove_dups[i]
    
-   append_to_file("sql_fix_duplicates.txt",text = sql)
+   if(as.character(sql) != "NULL"){
+     append_to_file("sql_fix_duplicates.txt",text = as.character(sql))
+   }
+
    
   
 }
+
+
