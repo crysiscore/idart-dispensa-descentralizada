@@ -30,7 +30,6 @@ detect_codes_pat_names <- function(first.name, last.name) {
 
 # Define the function
 # Coparar dados demograficos e clinicas
-
 compare_pat_demografic_clinic <- function(vec.clinic.uuid, vec.main.clinic.uuid, vec.uuid.openmrs) {
   # Check if the input string has exactly 6 characters
   
@@ -82,7 +81,6 @@ compare_pat_demografic_clinic <- function(vec.clinic.uuid, vec.main.clinic.uuid,
 
 # Define the function
 # Verifica o uuid corecto do paciente
-
 get_openmrs_uuid <- function(nid, us.name){
   
   uuid <- ""
@@ -141,7 +139,6 @@ get_openmrs_uuid <- function(nid, us.name){
 }
 
 
-
 create_sql <- function(delete_flag, id, patientid,uuidopenmrs, syncuuid){
   
   if(delete_flag=="TRUE"){
@@ -156,7 +153,6 @@ create_sql <- function(delete_flag, id, patientid,uuidopenmrs, syncuuid){
   }
 
 }
-
 create_sql_fix_wrong_openmrs_uuid <- function(update_uuid_openmrs, id, patientid,old.uuid.openmrs,new.uuid.openmrs , clinic.name){
   
   sql_query <- ""
@@ -169,7 +165,6 @@ create_sql_fix_wrong_openmrs_uuid <- function(update_uuid_openmrs, id, patientid
   return(sql_query)
 }
 
-
 append_to_file <- function(file_path, text) {
   # Open the file in append mode
   file_connection <- file(file_path, open = "a")
@@ -179,5 +174,67 @@ append_to_file <- function(file_path, text) {
   
   # Close the file connection
   close(file_connection)
+}
+
+
+# Define the function
+# Verifica o uuid corecto do paciente
+
+get_openmrs_names <- function(uuid, us.name){
+  
+  df_found_pat <- ""
+
+  
+  if(us.name == "CS PORTO"){
+    
+    df_found_pat <- patients_porto[ which(str_squish(patients_porto$uuid)==uuid),]
+    
+  } else if (us.name =="CS Xipamanine" ){
+    
+    df_found_pat <- patients_xipamanine[ which(str_squish(patients_xipamanine$uuid)==uuid),]
+    
+  } else if (us.name =="CS ALBASINE" ){
+    
+    df_found_pat <- patients_albasine[ which(str_squish(patients_albasine$uuid)==uuid),]
+    
+  } else if (us.name == "CS Chamanculo"){
+    
+    df_found_pat <- patients_chamanculo[ which(str_squish(patients_chamanculo$uuid)==uuid),]
+    
+  } else if (us.name == "CS Alto Mae"){
+    
+    df_found_pat <- patients_altomae[ which(str_squish(patients_altomae$uuid)==uuid),]
+    
+  } else if (us.name ==  "CS Bagamoio" ){
+    
+    df_found_pat <- patients_bagamoio[ which(str_squish(patients_bagamoio$uuid)==uuid),]
+    
+  } else if (us.name == "CS 1 de Maio"){
+    
+    df_found_pat <- patients_1_maio[ which(str_squish(patients_1_maio$uuid)==uuid),]
+    
+  } else if (us.name ==  "Centro de Saude Jose Macamo"){
+    
+    df_found_pat <- patients_josemacamo_cs[ which(str_squish(patients_josemacamo_cs$uuid)==uuid),]
+    
+  } else if (us.name == "CS Maxaquene" ){
+    
+    df_found_pat <- patients_maxaquene[ which(str_squish(patients_maxaquene$uuid)==uuid),]
+    
+  } else if (us.name == "Centro de Saude de Zimpeto" ){
+    
+    df_found_pat <- patients_zimpeto[ which(str_squish(patients_zimpeto$uuid)==uuid),]
+    
+  } else if (us.name == "Centro Saude Polana Canico" ){
+    
+    df_found_pat <- patients_polana_canico[ which(str_squish(patients_polana_canico$uuid)==uuid),]
+    
+  } else if (us.name == "Centro de Saude da Catembe"){
+    
+    df_found_pat <- patients_catembe[ which(str_squish(patients_catembe$uuid)==uuid),]
+  }  
+  
+  return(df_found_pat)
+  
 }
 

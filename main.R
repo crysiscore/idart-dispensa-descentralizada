@@ -7,6 +7,16 @@ df_patients <- dbGetQuery(con,query_patients)
 df_dispense <- dbGetQuery(con,query_dispense)
 df_episode <- dbGetQuery(con,query_episode)
 
+# df_patients <- dbGetQuery(conn = con,statement = "SELECT 
+#             sp.id,
+#             sp.firstnames as sp_patientfirstname,
+#             sp.lastname as sp_patientlastname,
+#             sp.patientid as sp_patientid,
+#             sp.uuidopenmrs,
+#             sp.mainclinicname
+#             FROM  public.sync_temp_patients sp
+#            
+#             where LENGTH(firstnames)=6 and LENGTH(lastname)=6 and  (firstnames ~ '[0-9]' or lastname ~ '[0-9]') ;")
 
 # Pacientes duplicados por NID
 df_dup_patients  <- df_patients[duplicated(df_patients) | duplicated(df_patients$patientid, fromLast = TRUE), ]
@@ -218,7 +228,9 @@ for (i in 1:nrow(b) ) {
    sql <- b$sql_remove_dups[i]
    
    if(as.character(sql) != "NULL"){
+     
      append_to_file("sql_fix_duplicates.txt",text = as.character(sql))
+     
    }
 
    
